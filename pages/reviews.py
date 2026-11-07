@@ -21,6 +21,14 @@ class ReviewsPage(tk.Frame):
         header(self, self.app, 'Reviews')
         outer, content = scrollable(self); outer.pack(fill='both', expand=True)
         place = self.current_place()
+        selector = tk.Frame(content, bg=COLORS['bg']); selector.pack(fill='x', padx=PAGE_PAD, pady=(12,0))
+        tk.Label(selector, text='Explore reviews for:', font=FONTS['small'], bg=COLORS['bg'], fg=COLORS['muted']).pack(side='left', padx=(0,8))
+        from tkinter import ttk
+        choice = tk.StringVar(value=place['name'])
+        combo = ttk.Combobox(selector, textvariable=choice, values=[p['name'] for p in PLACES], state='readonly', width=32); combo.pack(side='left')
+        def change_place(event=None):
+            self.app.selected_place = next((p for p in PLACES if p['name']==choice.get()), place); self.refresh()
+        combo.bind('<<ComboboxSelected>>', change_place)
         reviews = [p for p in self.app.posts if p.get('place') == place['name'] and p.get('text') and int(p.get('rating') or 0) > 0]
         ratings = [int(p['rating']) for p in reviews]
         average = sum(ratings) / len(ratings) if ratings else 0
@@ -48,7 +56,7 @@ class ReviewsPage(tk.Frame):
             return
         post = {'owner': self.app.current_user.get('email', '').lower(), 'owner_name': self.app.current_user.get('name', 'Traveller'),
                 'place': self.current_place()['name'], 'text': text.strip(), 'rating': rating, 'photo': '', 'likes': []}
-        ensure_post_id(post); self.app.posts.append(post); save_social_data(self.app.posts, self.app.following)
+        ensure_post_id(post); self.app.posts.append(post); save_social_data(self.app.posts)
         self.app.refresh_user_ratings()
         self.app.activity.record_review(self.current_place())
         show_dialog(self, 'Review Added', 'Your review and rating have been saved.', 'success')

@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog, ttk
 
-from .social_data import save_social_data, ensure_post_id
+from .social_data import save_social_data, ensure_post_id, store_uploaded_image, add_app_notification
 from .common import (COLORS, FONTS, PAGE_PAD, PLACES, autowrap, clear_frame, header,
                      make_button, rounded_card, scrollable, show_dialog)
 
@@ -100,8 +100,23 @@ class CreatePostPage(tk.Frame):
         path = filedialog.askopenfilename(title='Choose a picture',
                                           filetypes=[('Image files', '*.png *.jpg *.jpeg *.gif')])
         if path:
-            self.photo_path = path
+            stored = store_uploaded_image(path, 'post')
+            if not stored:
+                show_dialog(self, 'Picture', 'The selected image could not be saved.', 'error')
+                return
+            self.photo_path = stored
             self.upload.config(text='✓ ' + os.path.basename(path))
+            self.show_photo_preview()
+
+    def show_photo_preview(self):
+        if hasattr(self, 'preview_label'):
+            self.preview_label.destroy()
+        from .common import load_image
+        image = load_image(self.photo_path, (360, 220))
+        if image:
+            self.preview_label = tk.Label(self.upload.master, image=image, bg='white')
+            self.preview_label.image = image
+            self.preview_label.pack(fill='x', pady=(0, 8), before=self.upload.master.winfo_children()[1] if len(self.upload.master.winfo_children())>1 else None)
 
     def set_rating(self, number):
         """Fill the first `number` stars."""
@@ -126,7 +141,10 @@ class CreatePostPage(tk.Frame):
         }
         ensure_post_id(post)
         self.app.posts.append(post)
-        save_social_data(self.app.posts, self.app.following)
+        save_social_data(self.app.posts)
+        # App-wide discovery notice: travel content, not social follow activity.
+        for frame_user in [self.app.current_user.get('email','')]:
+            add_app_notification(frame_user, 'post', f'Your new post about {self.place.get()} is now part of LamGo Explore.')
         self.app.refresh_user_ratings()
         chosen = next((p for p in PLACES if p['name'] == self.place.get()), None)
         if chosen:

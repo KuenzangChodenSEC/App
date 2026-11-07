@@ -1,11 +1,24 @@
 {
   "08230151.sce@rub.edu.bt": {
+    "searches": [
+      "Mountains"
+    ],
+    "types": {
+      "Nature & Hiking": 3.825,
+      "Mountains & Peaks": 4.321
+    },
+    "difficulty": {
+      "Moderate": 1.359,
+      "Easy": 0.97
+    }
+  },
+  "kuenzang200295@gmail.com": {
     "searches": [],
     "types": {
       "Nature & Hiking": 2.0
     },
     "difficulty": {
-      "Moderate": 0.7
+      "Hard": 0.7
     }
   }
 }

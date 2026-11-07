@@ -13,6 +13,7 @@ import os
 import re
 import tkinter as tk
 
+from .common import LOGO_IMAGE, load_image
 from .common import AUTH_IMAGE, BASE_DIR, COLORS, FONTS, image_banner, show_dialog
 from .paths import user_data_path
 
@@ -97,17 +98,22 @@ class AuthPage(tk.Frame):
         outer.grid_columnconfigure(1, weight=4)
 
         # --- Left: picture + caption strip at the bottom ---
-        left = tk.Frame(outer, bg=COLORS['green_dark'])
+        left = tk.Frame(outer, bg='white')
         left.grid(row=0, column=0, sticky='nsew')
-        image_banner(left, path=AUTH_IMAGE, bg=COLORS['green_dark']).place(
+        image_banner(left, path=AUTH_IMAGE, bg='white').place(
             relx=0, rely=0, relwidth=1, relheight=1)
 
+        # Small LamGo logo at the top, matching the dashboard style.
+        logo = load_image(LOGO_IMAGE, (58, 34))
+        if logo:
+            logo_label = tk.Label(left, image=logo, bg='white', bd=0)
+            logo_label.image = logo
+            logo_label.place(relx=.05, rely=.04, anchor='nw')
+
         caption = tk.Frame(left, bg=CAPTION_BG)
-        caption.place(relx=0, rely=.70, relwidth=1, relheight=.30)
-        tk.Label(caption, text='LamGo', font=('Segoe UI', 30, 'bold'),
-                 bg=CAPTION_BG, fg='white').pack(anchor='w', padx=35, pady=(25, 3))
+        caption.place(relx=0, rely=.72, relwidth=1, relheight=.28)
         self.caption_title = tk.Label(caption, font=('Segoe UI', 15, 'bold'), bg=CAPTION_BG, fg='white')
-        self.caption_title.pack(anchor='w', padx=35)
+        self.caption_title.pack(anchor='w', padx=35, pady=(22, 0))
         self.caption_text = tk.Label(caption, font=FONTS['body'], bg=CAPTION_BG, fg='#DCEBE4')
         self.caption_text.pack(anchor='w', padx=35, pady=7)
 

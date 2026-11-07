@@ -29,10 +29,11 @@ from .dzongkhag_data import DZONGKHAGS, dzongkhag_rating, places_in  # noqa: F40
 # 1. SETTINGS
 # ---------------------------------------------------------------------------
 COLORS = {
-    'green': '#8B5E3C', 'green_dark': '#65432F', 'green_light': '#F3E8DA',
-    'bg': '#F7F1E8', 'white': '#FFFCF7', 'text': '#35291F', 'muted': '#88796B',
-    'border': '#E5D7C6', 'gold': '#B98535', 'danger': '#B84F4F', 'blue': '#8A7561',
-    'cream': '#F7F1E8', 'brown': '#8B5E3C', 'brown_dark': '#65432F',
+    # LamGo dashboard palette: deep navy navigation, airy blue backgrounds and warm gold accents.
+    'green': '#0B2D57', 'green_dark': '#071E3D', 'green_light': '#E8F1FF',
+    'bg': '#EAF2FF', 'white': '#FFFFFF', 'text': '#102A4C', 'muted': '#63748C',
+    'border': '#C9D8EE', 'gold': '#F5B942', 'danger': '#C95A5A', 'blue': '#4A7FBD',
+    'cream': '#F5F9FF', 'brown': '#0B2D57', 'brown_dark': '#071E3D',
 }
 
 FONTS = {
@@ -52,7 +53,8 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 PLACES_DIR = os.path.join(ASSETS_DIR, 'places')                      # one photo per place
 DZONGKHAGS_DIR = os.path.join(ASSETS_DIR, 'dzongkhags')                # optional: one photo per dzongkhag
 DEFAULT_IMAGE = os.path.join(ASSETS_DIR, 'bhutan_place.jpg')         # used if a place has no photo
-AUTH_IMAGE = os.path.join(ASSETS_DIR, 'auth_background.jpg')         # login / sign-up picture
+AUTH_IMAGE = os.path.join(ASSETS_DIR, 'auth_background.jpg')
+LOGO_IMAGE = os.path.join(ASSETS_DIR, 'lamgo_logo.png')         # login / sign-up picture
 IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.webp')
 
 # ---------------------------------------------------------------------------
@@ -82,7 +84,11 @@ def make_button(parent, text, command, primary=True, width=None):
     }
     if width:
         options['width'] = width
-    return tk.Button(parent, **options)
+    button = tk.Button(parent, **options)
+    normal_bg = options['bg']; hover_bg = COLORS['brown_dark'] if primary else COLORS['cream']
+    button.bind('<Enter>', lambda e: button.config(bg=hover_bg))
+    button.bind('<Leave>', lambda e: button.config(bg=normal_bg))
+    return button
 
 
 def show_dialog(parent, title, message, kind='info'):
@@ -290,20 +296,26 @@ def autowrap(widget, margin=0):
 # ---------------------------------------------------------------------------
 # 5. WIDGETS
 # ---------------------------------------------------------------------------
-NAV_PAGES = ['Home', 'Explore', 'Follow / Friends', 'Reviews', 'Create Post', 'Profile']
+NAV_PAGES = ['Home', 'Explore', 'Community', 'Saved Places', 'Reviews', 'Create Post', 'Profile']
 
 
 def header(parent, app, active='Home'):
     """The white top bar: logo, navigation links, notifications, profile and a green Back button."""
-    bar = tk.Frame(parent, bg='white', height=68,
+    bar = tk.Frame(parent, bg='white', height=62,
                    highlightbackground=COLORS['border'], highlightthickness=1)
     bar.pack(fill='x')
     bar.pack_propagate(False)
 
-    # Left side: logo and page links
-    tk.Button(bar, text='▲ LamGo', command=lambda: app.show_page('Home'),
-              font=('Segoe UI', 18, 'bold'), fg=COLORS['brown'], bg=COLORS['white'],
-              bd=0, cursor='hand2').pack(side='left', padx=(22, 28))
+    # Left side: use the supplied LamGo logo, with a text fallback.
+    logo = load_image(LOGO_IMAGE, (58, 32))
+    if logo:
+        logo_button = tk.Button(bar, image=logo, command=lambda: app.show_page('Home'),
+                                bg=COLORS['white'], activebackground=COLORS['white'], bd=0, cursor='hand2')
+        logo_button.image = logo
+    else:
+        logo_button = tk.Button(bar, text='LamGo', command=lambda: app.show_page('Home'),
+                                font=('Segoe UI', 18, 'bold'), fg=COLORS['brown'], bg=COLORS['white'], bd=0, cursor='hand2')
+    logo_button.pack(side='left', padx=(14, 14))
 
     for name in NAV_PAGES:
         is_active = (name == active)

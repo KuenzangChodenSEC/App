@@ -30,7 +30,7 @@ class NotificationsPage(tk.Frame):
             row_bg = COLORS['cream'] if not item.get('read') else COLORS['white']
             row = tk.Frame(box, bg=row_bg, pady=10, padx=8)
             row.pack(fill='x', pady=3)
-            symbol = {'follow': '＋', 'like': '♥', 'comment': '💬'}.get(item.get('kind'), '🔔')
+            symbol = {'update': '✨', 'place': '📍', 'post': '📝'}.get(item.get('kind'), '🔔')
             tk.Label(row, text=symbol, font=FONTS['heading'], bg=row_bg,
                      fg=COLORS['brown']).pack(side='left', padx=(0, 10))
             message = item.get('detail') or 'You have a new LamGo notification.'
@@ -40,7 +40,7 @@ class NotificationsPage(tk.Frame):
                 tk.Label(row, text='NEW', font=FONTS['small'], bg=row_bg,
                          fg=COLORS['brown']).pack(side='right', padx=8)
         if not self.app.notifications:
-            tk.Label(box, text='No notifications yet. When someone follows you, likes your post, or comments, you will see it here.',
+            tk.Label(box, text='No notifications yet. LamGo will show app updates, newly discovered places and new travel posts here.',
                      font=FONTS['body'], bg=COLORS['white'], fg=COLORS['muted'],
                      wraplength=750, justify='left').pack(anchor='w', pady=25)
         make_button(box, 'Mark All as Read', self.mark_read, False).pack(anchor='e', pady=12)

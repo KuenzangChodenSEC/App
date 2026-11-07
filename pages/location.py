@@ -34,8 +34,8 @@ class LocationPage(tk.Frame):
         label = tk.Label(live, text=status, font=FONTS['body'], bg=COLORS['white'], fg=COLORS['text'], justify='left')
         label.pack(anchor='w', pady=(10, 12)); autowrap(label)
         buttons = tk.Frame(live, bg=COLORS['white']); buttons.pack(anchor='w')
-        make_button(buttons, 'Use Precise Device Location', self.app.detect_precise_location, True).pack(side='left', padx=(0, 8))
-        make_button(buttons, 'Approximate IP Location', self.app.detect_location, False).pack(side='left', padx=(0, 8))
+        make_button(buttons, 'Detect My Location', self.app.detect_precise_location, True).pack(side='left', padx=(0, 8))
+        make_button(buttons, 'Change Location', self.change_location, False).pack(side='left', padx=(0, 8))
         make_button(buttons, 'Open My Location in Maps', self.open_current_location, False).pack(side='left')
 
         chooser = rounded_card(content); chooser.pack(fill='x', padx=PAGE_PAD, pady=14)
@@ -57,6 +57,13 @@ class LocationPage(tk.Frame):
         make_button(destination, 'Open This Place in Google Maps', lambda: open_map(place), True).pack(anchor='w')
         note = tk.Label(destination, text='Precise location uses your default browser and asks permission. Accuracy depends on your device, browser, operating-system settings, GPS/Wi-Fi availability, and whether you allow access. If permission is denied or unavailable, use approximate IP location or choose a district manually. LamGo does not invent a fallback coordinate.', font=FONTS['small'], bg=COLORS['white'], fg=COLORS['muted'], justify='left', anchor='w')
         note.pack(fill='x', pady=(12, 0)); autowrap(note)
+
+    def change_location(self):
+        from tkinter import simpledialog
+        name = simpledialog.askstring('Change Location', 'Enter a Bhutan district:', parent=self)
+        if name:
+            match = next((d['name'] for d in DZONGKHAGS if d['name'].lower() == name.strip().lower()), None)
+            if match: self.set_district(match)
 
     def set_district(self, name):
         self.app.set_manual_location(name)

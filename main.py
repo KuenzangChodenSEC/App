@@ -58,7 +58,7 @@ class LamGoApp(tk.Tk):
         self.location_listeners = []    # location bars that want to know when the location changes
         self._geo_queue = None
         self.saved_places = []          # names of saved places
-        self.posts, self.following = load_social_data()  # persistent user posts, likes and follows
+        self.posts = load_social_data()  # persistent community posts, likes and comments
         self.refresh_user_ratings()
         self.notifications = []
 
@@ -112,7 +112,7 @@ class LamGoApp(tk.Tk):
             'Reviews': ReviewsPage,
             'Create Post': CreatePostPage,
             'Profile': ProfilePage,
-            'Follow / Friends': SocialPage,
+            'Community': SocialPage,
             LOGIN_PAGE: AuthPage,
             'Notifications': NotificationsPage,
             'Filters': FiltersPage,
@@ -191,6 +191,10 @@ class LamGoApp(tk.Tk):
         """Start a session for `user` and go straight to the Home page."""
         self.current_user = user
         self.notifications = load_notifications(user.get('email', '').lower())
+        from pages.social_data import add_app_notification
+        if not self.notifications:
+            add_app_notification(user.get('email',''), 'update', 'Welcome to LamGo. Explore newly discovered places and travel stories from the community.')
+            self.notifications = load_notifications(user.get('email','').lower())
         # Assign stable IDs/like lists to older posts loaded from the social store.
         for post in self.posts:
             ensure_post_id(post)
@@ -200,7 +204,7 @@ class LamGoApp(tk.Tk):
         self.detect_location()                            # runs in the background; Home updates when done
 
     def logout(self):
-        save_social_data(self.posts, self.following)
+        save_social_data(self.posts)
         self.current_user = {}
         self.activity = Activity('')
         self.user_location = None
@@ -306,7 +310,7 @@ class LamGoApp(tk.Tk):
             self.activity.record_save(place)
             show_dialog(self, 'Saved Places', f'{name} saved.', 'success')
 
-        for page_name in ['Home', 'Explore', 'Place Details', 'Dzongkhag', 'Profile', 'Saved Places', 'Follow / Friends', 'Reviews', 'My Posts']:
+        for page_name in ['Home', 'Explore', 'Place Details', 'Dzongkhag', 'Profile', 'Saved Places', 'Reviews', 'My Posts']:
             page = self.frames.get(page_name)
             if page is not None and hasattr(page, 'refresh'):
                 page.refresh()

@@ -1,4 +1,4 @@
-"""Portable JSON storage for LamGo posts, follows, comments and notifications.
+"""Portable JSON storage for LamGo posts, comments, likes and notifications.
 
 This is local storage: accounts on the same installation share it. For users on
 separate laptops to see each other's activity, configure a hosted backend.
@@ -6,6 +6,7 @@ separate laptops to see each other's activity, configure a hosted backend.
 import json
 import os
 import uuid
+import shutil
 from datetime import datetime, timezone
 from .paths import user_data_path
 
@@ -33,7 +34,6 @@ def _write(data):
 def load_social_data():
     data = _read()
     posts = data.get('posts', [])
-    follows = data.get('follows', {})
     changed = False
     for post in posts:
         if not post.get('id'):
@@ -43,14 +43,15 @@ def load_social_data():
             if key not in post:
                 post[key] = value; changed = True
     if changed:
-        data.update(posts=posts, follows=follows)
+        data.update(posts=posts)
         _write(data)
-    return posts, follows
+    return posts
 
 
-def save_social_data(posts, follows):
+def save_social_data(posts):
     data = _read()
-    data.update(posts=posts, follows=follows)
+    data.pop('follows', None)  # remove obsolete follow data from older installations
+    data.update(posts=posts)
     data.setdefault('notifications', {})
     _write(data)
 
@@ -85,6 +86,32 @@ def mark_notifications_read(email):
         item['read'] = True
     _write(data)
 
+
+
+def store_uploaded_image(source_path, prefix='image'):
+    """Copy an uploaded image into LamGo's writable data folder and return its stable path."""
+    if not source_path or not os.path.isfile(source_path):
+        return ''
+    folder = user_data_path('uploads', os.path.join(BASE_DIR, 'data', 'uploads'))
+    os.makedirs(folder, exist_ok=True)
+    ext = os.path.splitext(source_path)[1].lower() or '.jpg'
+    target = os.path.join(folder, f"{prefix}_{uuid.uuid4().hex}{ext}")
+    try:
+        shutil.copy2(source_path, target)
+        return target
+    except OSError:
+        return ''
+
+def add_app_notification(recipient, kind, detail):
+    """Create a non-social notification for an account."""
+    recipient = (recipient or '').strip().lower()
+    if not recipient: return
+    data = _read(); inboxes = data.setdefault('notifications', {})
+    inbox = inboxes.setdefault(recipient, [])
+    inbox.insert(0, {'id': uuid.uuid4().hex, 'actor': 'lamgo', 'kind': kind,
+                     'target_id': '', 'detail': detail,
+                     'created_at': datetime.now(timezone.utc).isoformat(), 'read': False})
+    inboxes[recipient] = inbox[:300]; _write(data)
 
 def ensure_post_id(post):
     post.setdefault('id', uuid.uuid4().hex)

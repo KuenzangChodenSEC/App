@@ -3,8 +3,9 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
+from .social_data import store_uploaded_image
 from .common import (COLORS, FONTS, PAGE_PAD, PLACES, card_grid, clear_frame, header,
-                     load_image, make_button, rounded_card, scrollable)
+                     load_image, make_button, rounded_card, scrollable, show_dialog)
 
 
 class ProfilePage(tk.Frame):
@@ -57,7 +58,7 @@ class ProfilePage(tk.Frame):
         menu = rounded_card(content)
         menu.pack(fill='x', padx=PAGE_PAD, pady=(0, 15))
         shortcuts = [('📌 My Saved Places', 'Saved Places'), ('📝 My Posts', 'My Posts'),
-                     ('🔔 Notifications', 'Notifications'), ('📍 Live Location', 'Location'), ('👥 Follow / Friends', 'Follow / Friends')]
+                     ('🔔 Notifications', 'Notifications'), ('📍 Live Location', 'Location')]
         for text, page in shortcuts:
             make_button(menu, text, lambda p=page: self.app.show_page(p), False).pack(
                 side='left', expand=True, padx=5)
@@ -94,7 +95,11 @@ class ProfilePage(tk.Frame):
         path = filedialog.askopenfilename(title='Choose profile photo',
                                           filetypes=[('Image files', '*.png *.jpg *.jpeg *.gif')])
         if path:
-            self.app.current_user['photo'] = path
+            stored = store_uploaded_image(path, 'profile')
+            if not stored:
+                show_dialog(self, 'Profile Photo', 'The selected image could not be saved.', 'error')
+                return
+            self.app.current_user['photo'] = stored
             self.app.save_current_user()
             self.refresh()
 
