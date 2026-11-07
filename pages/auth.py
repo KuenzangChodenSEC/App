@@ -18,7 +18,7 @@ from .common import AUTH_IMAGE, BASE_DIR, COLORS, FONTS, image_banner, show_dial
 from .paths import user_data_path
 
 USERS_FILE = user_data_path('users.json', os.path.join(BASE_DIR, 'users.json'))
-CAPTION_BG = '#65432F'
+CAPTION_BG = '#0B4F8A'
 PASSWORD_RULES = 'Use 8+ characters with uppercase, lowercase, a number and a symbol.'
 
 # Text shown over the picture for each tab
@@ -104,17 +104,17 @@ class AuthPage(tk.Frame):
             relx=0, rely=0, relwidth=1, relheight=1)
 
         # Small LamGo logo at the top, matching the dashboard style.
-        logo = load_image(LOGO_IMAGE, (58, 34))
+        logo = load_image(LOGO_IMAGE, (38, 22))
         if logo:
             logo_label = tk.Label(left, image=logo, bg='white', bd=0)
             logo_label.image = logo
-            logo_label.place(relx=.05, rely=.04, anchor='nw')
+            logo_label.place(relx=.04, rely=.03, anchor='nw')
 
         caption = tk.Frame(left, bg=CAPTION_BG)
         caption.place(relx=0, rely=.72, relwidth=1, relheight=.28)
         self.caption_title = tk.Label(caption, font=('Segoe UI', 15, 'bold'), bg=CAPTION_BG, fg='white')
         self.caption_title.pack(anchor='w', padx=35, pady=(22, 0))
-        self.caption_text = tk.Label(caption, font=FONTS['body'], bg=CAPTION_BG, fg='#DCEBE4')
+        self.caption_text = tk.Label(caption, font=FONTS['body'], bg=CAPTION_BG, fg='#E8F1FF')
         self.caption_text.pack(anchor='w', padx=35, pady=7)
 
         # --- Right: white panel with the form centred in it ---
