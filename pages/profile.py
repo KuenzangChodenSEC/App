@@ -91,17 +91,40 @@ class ProfilePage(tk.Frame):
 
     # ------------------------------------------------------------------
     def change_photo(self):
-        """Pick a new profile picture from the computer."""
-        path = filedialog.askopenfilename(title='Choose profile photo',
-                                          filetypes=[('Image files', '*.png *.jpg *.jpeg *.gif')])
-        if path:
-            stored = store_uploaded_image(path, 'profile')
-            if not stored:
-                show_dialog(self, 'Profile Photo', 'The selected image could not be saved.', 'error')
-                return
-            self.app.current_user['photo'] = stored
-            self.app.save_current_user()
-            self.refresh()
+        """Pick and save a new profile picture from the computer."""
+        path = filedialog.askopenfilename(
+        title='Choose Profile Photo',
+        filetypes=[
+            ('Image files', '*.png *.jpg *.jpeg *.gif *.webp')
+        ]
+    )
+        if not path:
+            return
+        
+        stored = store_uploaded_image(path, 'profile')
+        
+        if not stored or not os.path.exists(stored):
+            from tkinter import messagebox
+            messagebox.showerror(
+                'Profile Photo',
+                'The selected image could not be saved.'
+                )
+            return
+
+    # Save the new image path
+        self.app.current_user['photo'] = stored
+
+    # Save the user information permanently
+        self.app.save_current_user()
+
+    # Refresh the profile immediately
+        self.refresh()
+        
+        from tkinter import messagebox
+        messagebox.showinfo(
+            'Profile Updated',
+            'Your profile picture has been updated successfully.'
+            )
 
     def edit_profile(self):
         """Small pop-up window to change the name and email."""

@@ -78,21 +78,71 @@ class CreatePostPage(tk.Frame):
     def build_recent_posts(self, body):
         card = rounded_card(body)
         card.pack(side='left', fill='both', expand=True, padx=(10, 0))
-        tk.Label(card, text='My Posts', font=FONTS['heading'], bg='white').pack(anchor='w')
-
-        email = self.app.current_user.get('email')
-        posts = [p for p in self.app.posts if p.get('owner', email) == email]
+        
+        tk.Label(
+        card,
+        text='My Posts',
+        font=FONTS['heading'],
+        bg='white'
+    ).pack(anchor='w')
+        
+        email = self.app.current_user.get('email', '').lower()
+        
+        posts = [
+            p for p in self.app.posts
+            if p.get('owner', '').lower() == email
+            ]
+        
         if not posts:
-            tk.Label(card, text='Your posts will appear here after you create one.',
-                     font=FONTS['body'], bg='white', fg=COLORS['muted']).pack(anchor='w', pady=15)
+            tk.Label(
+            card,
+            text='Your posts will appear here after you create one.',
+            font=FONTS['body'],
+            bg='white',
+            fg=COLORS['muted']
+            ).pack(anchor='w', pady=15)
+            
+            return
+        
+        from .common import load_image
+        
+        for post in posts[-5:]:
+            post_frame = tk.Frame(card, bg='white')
+            post_frame.pack(fill='x', pady=10)
 
-        for post in posts[-5:]:                           # the five most recent
-            tk.Label(card, text=f"{post.get('place', '')}  ★ {post.get('rating', 0)}",
-                     font=FONTS['subheading'], bg='white').pack(anchor='w', pady=(10, 2))
-            text = tk.Label(card, text=post.get('text', ''), font=FONTS['body'], bg='white',
-                            fg=COLORS['muted'], justify='left', anchor='w')
-            text.pack(fill='x')
-            autowrap(text)
+        photo = post.get('photo', '')
+
+        if photo and os.path.exists(photo):
+            image = load_image(photo, (180, 110))
+
+            if image:
+                picture = tk.Label(
+                    post_frame,
+                    image=image,
+                    bg='white'
+                )
+                picture.image = image
+                picture.pack(side='left', padx=(0, 10))
+
+        details = tk.Frame(post_frame, bg='white')
+        details.pack(side='left', fill='x', expand=True)
+
+        tk.Label(
+            details,
+            text=f"{post.get('place', '')}  ★ {post.get('rating', 0)}",
+            font=FONTS['subheading'],
+            bg='white'
+        ).pack(anchor='w')
+
+        tk.Label(
+            details,
+            text=post.get('text', ''),
+            font=FONTS['body'],
+            bg='white',
+            fg=COLORS['muted'],
+            justify='left',
+            wraplength=300
+        ).pack(anchor='w', fill='x', pady=(5, 0))
 
     # ------------------------------------------------------------------
     def choose_photo(self):

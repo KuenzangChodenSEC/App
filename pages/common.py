@@ -301,13 +301,13 @@ NAV_PAGES = ['Home', 'Explore', 'Community', 'Saved Places', 'Reviews', 'Create 
 
 def header(parent, app, active='Home'):
     """The white top bar: logo, navigation links, notifications, profile and a green Back button."""
-    bar = tk.Frame(parent, bg='white', height=62,
+    bar = tk.Frame(parent, bg='white', height=54,
                    highlightbackground=COLORS['border'], highlightthickness=1)
     bar.pack(fill='x')
     bar.pack_propagate(False)
 
     # Left side: use the supplied LamGo logo, with a text fallback.
-    logo = load_image(LOGO_IMAGE, (58, 32))
+    logo = load_image(LOGO_IMAGE, (42, 24))
     if logo:
         logo_button = tk.Button(bar, image=logo, command=lambda: app.show_page('Home'),
                                 bg=COLORS['white'], activebackground=COLORS['white'], bd=0, cursor='hand2')
@@ -315,7 +315,7 @@ def header(parent, app, active='Home'):
     else:
         logo_button = tk.Button(bar, text='LamGo', command=lambda: app.show_page('Home'),
                                 font=('Segoe UI', 18, 'bold'), fg=COLORS['brown'], bg=COLORS['white'], bd=0, cursor='hand2')
-    logo_button.pack(side='left', padx=(14, 14))
+    logo_button.pack(side='left', padx=(8, 10))
 
     for name in NAV_PAGES:
         is_active = (name == active)
