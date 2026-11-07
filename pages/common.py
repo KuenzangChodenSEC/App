@@ -176,19 +176,28 @@ def dzongkhag_image_path(dzongkhag, number=1):
 
 
 def load_image(path, size=(400, 220)):
-    """Load a picture, crop/scale it to exactly `size` and return a Tk image (or None)."""
-    if not path or not os.path.exists(path):
+    """Load an image, preserve its proportions and crop it neatly to ``size``.
+
+    The returned PhotoImage is cached, while every widget still keeps its own
+    reference.  This prevents uploaded profile and post photos from vanishing.
+    """
+    if not path:
         return None
-    key = (os.path.abspath(path), size)
+    path = os.path.abspath(os.path.expanduser(str(path)))
+    if not os.path.isfile(path):
+        return None
+    key = (path, tuple(size), os.path.getmtime(path))
     if key in _image_cache:
         return _image_cache[key]
     try:
-        if PIL_AVAILABLE:
-            picture = Image.open(path).convert('RGB')
-            picture = ImageOps.fit(picture, size, method=Image.Resampling.LANCZOS)
+        if not PIL_AVAILABLE:
+            return None
+        with Image.open(path) as source:
+            picture = ImageOps.exif_transpose(source).convert('RGBA')
+            # ImageOps.fit fills the frame without stretching the photograph.
+            picture = ImageOps.fit(picture, tuple(size), method=Image.Resampling.LANCZOS,
+                                   centering=(0.5, 0.5))
             result = ImageTk.PhotoImage(picture)
-        else:
-            result = tk.PhotoImage(file=path)         # no resizing without Pillow
         _image_cache[key] = result
         return result
     except Exception:
@@ -300,40 +309,42 @@ NAV_PAGES = ['Home', 'Explore', 'Community', 'Saved Places', 'Reviews', 'Create 
 
 
 def header(parent, app, active='Home'):
-    """The white top bar: logo, navigation links, notifications, profile and a green Back button."""
-    bar = tk.Frame(parent, bg='white', height=54,
-                   highlightbackground=COLORS['border'], highlightthickness=1)
+    """Compact professional navigation inspired by the LamGo reference design."""
+    bar = tk.Frame(parent, bg=COLORS['green'], height=62)
     bar.pack(fill='x')
     bar.pack_propagate(False)
 
-    # Left side: use the supplied LamGo logo, with a text fallback.
-    logo = load_image(LOGO_IMAGE, (40, 22))
+    logo = load_image(LOGO_IMAGE, (42, 42))
     if logo:
         logo_button = tk.Button(bar, image=logo, command=lambda: app.show_page('Home'),
-                                bg=COLORS['white'], activebackground=COLORS['white'], bd=0, cursor='hand2')
+                                bg=COLORS['green'], activebackground=COLORS['green'], bd=0,
+                                cursor='hand2')
         logo_button.image = logo
     else:
         logo_button = tk.Button(bar, text='LamGo', command=lambda: app.show_page('Home'),
-                                font=('Segoe UI', 18, 'bold'), fg=COLORS['brown'], bg=COLORS['white'], bd=0, cursor='hand2')
-    logo_button.pack(side='left', padx=(8, 10))
+                                font=('Georgia', 16, 'bold'), fg='white', bg=COLORS['green'], bd=0)
+    logo_button.pack(side='left', padx=(16, 8), pady=8)
 
-    for name in NAV_PAGES:
-        is_active = (name == active)
-        tk.Button(bar, text=name, command=lambda n=name: app.show_page(n),
-                  font=('Segoe UI', 11, 'bold' if is_active else 'normal'),
-                  fg=COLORS['brown_dark'] if is_active else COLORS['muted'],
-                  bg='white', activebackground='white', bd=0, cursor='hand2',
-                  padx=14).pack(side='left')
+    brand = tk.Label(bar, text='LamGo', font=('Georgia', 17, 'bold'), fg='white', bg=COLORS['green'])
+    brand.pack(side='left', padx=(0, 16))
 
-    # Right side (packed from the right edge inwards): Back button, profile, notifications
-    tk.Button(bar, text='Back', command=app.go_back, bg=COLORS['brown'], fg='white',
-              activebackground=COLORS['brown_dark'], activeforeground='white',
-              font=FONTS['button'], bd=0, padx=18, pady=6,
-              cursor='hand2').pack(side='right', padx=(6, 22))
-    tk.Button(bar, text='👤', command=lambda: app.show_page('Profile'), bg='white', bd=0,
-              font=('Segoe UI Emoji', 14), cursor='hand2').pack(side='right', padx=5)
-    tk.Button(bar, text='🔔', command=lambda: app.show_page('Notifications'), bg='white', bd=0,
-              font=('Segoe UI Emoji', 13), cursor='hand2').pack(side='right', padx=4)
+    nav = ['Home', 'Explore', 'Reviews', 'Create Post', 'Community', 'Saved Places', 'Profile']
+    for name in nav:
+        active_now = name == active
+        btn = tk.Button(bar, text=name, command=lambda n=name: app.show_page(n),
+                        font=('Segoe UI', 9, 'bold'), bd=0, cursor='hand2', padx=10, pady=7,
+                        bg=COLORS['gold'] if active_now else COLORS['green'],
+                        fg=COLORS['green_dark'] if active_now else '#EAF2FF',
+                        activebackground=COLORS['gold'], activeforeground=COLORS['green_dark'])
+        btn.pack(side='left', padx=2, pady=12)
+        if not active_now:
+            btn.bind('<Enter>', lambda e, b=btn: b.config(bg='#164779'))
+            btn.bind('<Leave>', lambda e, b=btn: b.config(bg=COLORS['green']))
+
+    tk.Button(bar, text='⌂', command=lambda: app.show_page('Location'), bg=COLORS['green'], fg='white',
+              activebackground='#164779', bd=0, font=('Segoe UI', 13), cursor='hand2').pack(side='right', padx=4)
+    tk.Button(bar, text='🔔', command=lambda: app.show_page('Notifications'), bg=COLORS['green'], fg='white',
+              activebackground='#164779', bd=0, font=('Segoe UI Emoji', 12), cursor='hand2').pack(side='right', padx=4)
 
 
 def place_card(parent, app, place, compact=False, width=None, note=''):

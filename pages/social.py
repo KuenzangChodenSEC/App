@@ -31,10 +31,11 @@ class SocialPage(tk.Frame):
         tk.Label(title,text=('★'*rating+'☆'*(5-rating)) if rating else 'No rating',font=FONTS['body'],bg=COLORS['white'],fg=COLORS['gold']).pack(side='right')
         body=tk.Label(card,text=post.get('text',''),font=FONTS['body'],bg=COLORS['white'],fg=COLORS['text'],justify='left',anchor='w'); body.pack(fill='x',pady=(8,6)); autowrap(body)
         photo=post.get('photo','')
-        if photo and os.path.exists(photo):
-            img=load_image(photo,(500,260))
-            if img:
-                pic=tk.Label(card,image=img,bg=COLORS['white']); pic.image=img; pic.pack(anchor='w',pady=5)
+        img=load_image(photo,(500,260)) if photo and os.path.isfile(photo) else None
+        if img:
+            pic=tk.Label(card,image=img,bg=COLORS['white'],bd=0); pic.image=img; pic.pack(anchor='w',pady=8)
+        elif photo:
+            tk.Label(card, text='Photo unavailable', font=FONTS['small'], bg=COLORS['white'], fg=COLORS['muted']).pack(anchor='w')
         likes=post.setdefault('likes',[]); liked=me in likes
         actions=tk.Frame(card,bg=COLORS['white']); actions.pack(fill='x',pady=(6,0))
         make_button(actions,f"{'♥' if liked else '♡'}  {len(likes)} Like"+('d' if len(likes)!=1 else ''),lambda p=post:self.toggle_like(p),primary=liked).pack(side='left',padx=(0,8))

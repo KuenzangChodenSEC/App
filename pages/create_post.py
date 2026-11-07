@@ -123,7 +123,7 @@ class CreatePostPage(tk.Frame):
     def choose_photo(self):
         """Let the user pick a picture file from their computer."""
         path = filedialog.askopenfilename(title='Choose a picture',
-                                          filetypes=[('Image files', '*.png *.jpg *.jpeg *.gif')])
+                                          filetypes=[('Image files', '*.png *.jpg *.jpeg *.webp')])
         if path:
             stored = store_uploaded_image(path, 'post')
             if not stored:
@@ -134,14 +134,17 @@ class CreatePostPage(tk.Frame):
             self.show_photo_preview()
 
     def show_photo_preview(self):
-        if hasattr(self, 'preview_label'):
+        """Show the selected post image immediately using a fixed, fitted preview."""
+        if hasattr(self, 'preview_label') and self.preview_label.winfo_exists():
             self.preview_label.destroy()
         from .common import load_image
         image = load_image(self.photo_path, (360, 220))
         if image:
-            self.preview_label = tk.Label(self.upload.master, image=image, bg='white')
+            self.preview_label = tk.Label(self.upload.master, image=image, bg='white', bd=0)
             self.preview_label.image = image
-            self.preview_label.pack(fill='x', pady=(0, 8), before=self.upload.master.winfo_children()[1] if len(self.upload.master.winfo_children())>1 else None)
+            self.preview_label.pack(fill='x', pady=(8, 8), after=self.upload)
+        else:
+            show_dialog(self, 'Picture', 'The image was saved, but could not be opened. Please choose a JPG, PNG or WEBP image.', 'warning')
 
     def set_rating(self, number):
         """Fill the first `number` stars."""
@@ -154,6 +157,9 @@ class CreatePostPage(tk.Frame):
         text = self.experience.get('1.0', 'end').strip()
         if not text:
             show_dialog(self, 'Post', 'Write something about your visit.', 'warning')
+            return
+        if self.photo_path and not os.path.isfile(self.photo_path):
+            show_dialog(self, 'Picture', 'Please choose the image again before publishing.', 'warning')
             return
         post = {
             'owner': self.app.current_user.get('email', '').lower(),

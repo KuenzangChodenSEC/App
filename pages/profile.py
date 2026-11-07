@@ -36,10 +36,10 @@ class ProfilePage(tk.Frame):
         avatar.pack(side='left', padx=10)
         avatar.pack_propagate(False)
         photo = user.get('photo', '')
-        if photo and os.path.exists(photo):
-            image = load_image(photo, (85, 85))
+        image = load_image(photo, (85, 85)) if photo and os.path.isfile(photo) else None
+        if image:
             picture = tk.Label(avatar, image=image, bg='white')
-            picture.image = image                         # keep a reference
+            picture.image = image
             picture.pack(fill='both', expand=True)
         else:
             tk.Label(avatar, text='👤', font=('Segoe UI Emoji', 45), bg='white').pack(expand=True)
@@ -91,40 +91,19 @@ class ProfilePage(tk.Frame):
 
     # ------------------------------------------------------------------
     def change_photo(self):
-        """Pick and save a new profile picture from the computer."""
-        path = filedialog.askopenfilename(
-        title='Choose Profile Photo',
-        filetypes=[
-            ('Image files', '*.png *.jpg *.jpeg *.gif *.webp')
-        ]
-    )
-        if not path:
-            return
-        
-        stored = store_uploaded_image(path, 'profile')
-        
-        if not stored or not os.path.exists(stored):
-            from tkinter import messagebox
-            messagebox.showerror(
-                'Profile Photo',
-                'The selected image could not be saved.'
-                )
-            return
-
-    # Save the new image path
-        self.app.current_user['photo'] = stored
-
-    # Save the user information permanently
-        self.app.save_current_user()
-
-    # Refresh the profile immediately
-        self.refresh()
-        
-        from tkinter import messagebox
-        messagebox.showinfo(
-            'Profile Updated',
-            'Your profile picture has been updated successfully.'
-            )
+        """Pick a new profile picture from the computer."""
+        path = filedialog.askopenfilename(title='Choose profile photo',
+                                          filetypes=[('Image files', '*.png *.jpg *.jpeg *.webp')])
+        if path:
+            stored = store_uploaded_image(path, 'profile')
+            if not stored:
+                show_dialog(self, 'Profile Photo', 'The selected image could not be saved.', 'error')
+                return
+            self.app.current_user['photo'] = stored
+            self.app.save_current_user()
+            if os.path.isfile(stored):
+                self.refresh()
+                show_dialog(self, 'Profile Photo', 'Your profile picture has been updated.', 'success')
 
     def edit_profile(self):
         """Small pop-up window to change the name and email."""

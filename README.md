@@ -87,7 +87,7 @@ Set `AUTO_DETECT_LOCATION = False` in `pages/geo.py` to disable the internet loo
 ## Community features (updated)
 
 - LamGo now uses a warm cream and brown colour palette.
-- **Follow / Friends** lists registered users, supports follow/unfollow, and opens a user's posts and ratings.
+- **Community** displays travellers' public posts, likes, comments and ratings without follower/following features.
 - Posts and reviews, likes, and follow relationships are saved in `social_data.json` beside `main.py` so they remain after restarting the app.
 - Destination rating averages and rating counts are calculated from ratings submitted by LamGo users; the interface no longer inserts made-up sample reviews.
 - **Location** can request an approximate network-based location, let the user choose a district manually, and open the coordinates in Google Maps. Desktop Tkinter does not have direct phone GPS access; network location may be less precise than device GPS.

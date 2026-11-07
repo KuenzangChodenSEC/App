@@ -104,11 +104,11 @@ class AuthPage(tk.Frame):
             relx=0, rely=0, relwidth=1, relheight=1)
 
         # Small LamGo logo at the top, matching the dashboard style.
-        logo = load_image(LOGO_IMAGE, (38, 22))
+        logo = load_image(LOGO_IMAGE, (58, 58))
         if logo:
             logo_label = tk.Label(left, image=logo, bg='white', bd=0)
             logo_label.image = logo
-            logo_label.place(relx=.04, rely=.03, anchor='nw')
+            logo_label.place(relx=.035, rely=.035, anchor='nw')
 
         caption = tk.Frame(left, bg=CAPTION_BG)
         caption.place(relx=0, rely=.72, relwidth=1, relheight=.28)
@@ -151,8 +151,8 @@ class AuthPage(tk.Frame):
 
     def style_tabs(self, active):
         """Highlight the active tab ('login' or 'signup'); None highlights neither."""
-        on = {'bg': COLORS['green'], 'fg': 'white'}
-        off = {'bg': COLORS['green_light'], 'fg': COLORS['green']}
+        on = {'bg': COLORS['green'], 'fg': 'white', 'activebackground': COLORS['green_dark']}
+        off = {'bg': '#EEF4FF', 'fg': COLORS['green'], 'activebackground': '#DCE9FA'}
         self.login_tab.config(**(on if active == 'login' else off))
         self.signup_tab.config(**(on if active == 'signup' else off))
 

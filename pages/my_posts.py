@@ -24,8 +24,8 @@ class MyPostsPage(tk.Frame):
         tk.Label(top, text='My Posts', font=FONTS['title'], bg=COLORS['bg']).pack(side='left')
         make_button(top, 'Create Post', lambda: self.app.show_page('Create Post'), True).pack(side='right')
 
-        email = self.app.current_user.get('email')
-        posts = [p for p in self.app.posts if p.get('owner') == email]
+        email = self.app.current_user.get('email', '').strip().lower()
+        posts = [p for p in self.app.posts if p.get('owner', '').strip().lower() == email]
         if not posts:
             tk.Label(content, text='You have not created a post yet.', font=FONTS['body'],
                      bg=COLORS['bg'], fg=COLORS['muted']).pack(pady=60)
@@ -44,10 +44,10 @@ class MyPostsPage(tk.Frame):
         left.pack(side='left')
         left.pack_propagate(False)
         photo = post.get('photo')
-        if photo and os.path.exists(photo):
-            image = load_image(photo, (210, 140))
+        image = load_image(photo, (210, 140)) if photo and os.path.isfile(photo) else None
+        if image:
             picture = tk.Label(left, image=image, bg='white')
-            picture.image = image                         # keep a reference
+            picture.image = image
             picture.pack(fill='both', expand=True)
         else:
             tk.Label(left, text='📷\nNo photo', font=('Segoe UI Emoji', 18), bg='#F0F5F1',
