@@ -35,7 +35,7 @@ class LocationPage(tk.Frame):
         label.pack(anchor='w', pady=(10, 12)); autowrap(label)
         buttons = tk.Frame(live, bg=COLORS['white']); buttons.pack(anchor='w')
         make_button(buttons, 'Detect My Location', self.app.detect_precise_location, True).pack(side='left', padx=(0, 8))
-        make_button(buttons, 'Change Location', self.change_location, False).pack(side='left', padx=(0, 8))
+        make_button(buttons, 'Change Location', self.change_location, True).pack(side='left', padx=(0, 8))
         make_button(buttons, 'Open My Location in Maps', self.open_current_location, False).pack(side='left')
 
         chooser = rounded_card(content); chooser.pack(fill='x', padx=PAGE_PAD, pady=14)

@@ -116,9 +116,9 @@ def location_bar(parent, app, bg='white', fg=None):
     label.pack(side='left')
 
     def link(text, command):
-        tk.Button(bar, text=text, command=command, font=FONTS['small'], bg=bg, fg=fg, bd=0,
-                  activebackground=bg, activeforeground=fg, cursor='hand2',
-                  underline=0).pack(side='left', padx=(10, 0))
+        tk.Button(bar, text=text, command=command, font=FONTS['small'], bg=COLORS['ice_blue'], fg='black', bd=0,
+                  activebackground=COLORS['powder_blue'], activeforeground='black', cursor='hand2',
+                  padx=9, pady=4).pack(side='left', padx=(10, 0))
 
     link('Detect', app.detect_location)
     link('Change', lambda: choose_location_dialog(app))

@@ -32,6 +32,7 @@ from pages.saved_places import SavedPlacesPage
 from pages.social import SocialPage
 from pages.social_data import load_social_data, save_social_data, ensure_post_id, load_notifications
 from pages.database import initialize_database
+from pages.animations import AnimationManager
 from pages.paths import user_data_path
 
 LOGIN_PAGE = 'Login / Sign Up'
@@ -43,6 +44,7 @@ class LamGoApp(tk.Tk):
         self.title('LamGo - Discover Bhutan')
         self.minsize(1100, 700)
         self.configure(bg=COLORS['bg'])
+        self.animations = AnimationManager(self)
         self.start_maximized()
 
         # Ensure the SQLite place catalogue exists before pages load their data.
@@ -162,6 +164,7 @@ class LamGoApp(tk.Tk):
         if hasattr(frame, 'refresh'):
             frame.refresh()                         # rebuild the page with the latest data
         frame.tkraise()
+        self.animations.fade_window(frame, duration=140)
 
     def go_back(self):
         """Go to the previous page (or Home when there is no history)."""

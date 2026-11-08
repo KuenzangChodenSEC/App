@@ -3,7 +3,7 @@ import tkinter as tk
 
 from .recommender import similar_places
 from .common import (COLORS, FONTS, PAGE_PAD, PLACES, autowrap, card_grid, clear_frame, header,
-                     image_banner, make_button, open_map, place_image_path, rounded_card, scrollable)
+                     image_banner, make_button, open_map, place_image_path, rounded_card, scrollable, load_image, place_stats)
 
 
 class PlaceDetailsPage(tk.Frame):
@@ -22,8 +22,8 @@ class PlaceDetailsPage(tk.Frame):
         # Title, subtitle and the large main photo of THIS place
         tk.Label(content, text=place['name'], font=FONTS['title'], bg=COLORS['bg']).pack(
             anchor='w', padx=PAGE_PAD, pady=(20, 5))
-        tk.Label(content, text=f"📍 {place['location']}  •  ★ {place['rating']} ({place['reviews']} reviews)",
-                 font=FONTS['body'], bg=COLORS['bg'], fg=COLORS['muted']).pack(anchor='w', padx=PAGE_PAD)
+        average, count = place_stats(self.app, place)
+        tk.Label(content, text=f"📍 {place['location']}  •  ★ {average:.1f} ({count} ratings)", font=FONTS['body'], bg=COLORS['bg'], fg=COLORS['muted']).pack(anchor='w', padx=PAGE_PAD)
         image_banner(content, height=400, path=place_image_path(place)).pack(
             fill='x', padx=PAGE_PAD, pady=15)
 
@@ -68,17 +68,40 @@ class PlaceDetailsPage(tk.Frame):
             make_button(actions, text, command, primary).pack(side='left', fill='x', expand=True, padx=4)
 
     def build_photos(self, content, place):
-        """Three equal photos. Add <slug>_2.jpg and <slug>_3.jpg in assets/places for different ones."""
-        card = rounded_card(content)
-        card.pack(fill='x', padx=PAGE_PAD, pady=18)
-        tk.Label(card, text='Photos', font=FONTS['heading'], bg='white').pack(anchor='w')
-
-        row = tk.Frame(card, bg='white')
-        row.pack(fill='x', pady=8)
-        for column in range(3):
-            row.grid_columnconfigure(column, weight=1, uniform='photos')   # equal widths
-            image_banner(row, height=220, path=place_image_path(place, column + 1)).grid(
-                row=0, column=column, padx=5, sticky='ew')
+        """Gallery with distinct official/user photos, crossfade-style switching and slideshow controls."""
+        card=rounded_card(content); card.pack(fill='x',padx=PAGE_PAD,pady=18)
+        tk.Label(card,text='Photos from LamGo & this place',font=FONTS['heading'],bg=COLORS['white']).pack(anchor='w')
+        paths=[]
+        # Only keep files that actually exist: never repeat the same fallback photograph.
+        import os
+        for n in range(1,13):
+            path=place_image_path(place,n)
+            if path and os.path.isfile(path) and path not in paths: paths.append(path)
+        for post in self.app.posts:
+            path=post.get('photo')
+            if post.get('place')==place['name'] and path and os.path.isfile(path) and path not in paths: paths.append(path)
+        if not paths:
+            tk.Label(card,text='No photos are available yet.',bg=COLORS['white'],fg=COLORS['muted']).pack(anchor='w',pady=10); return
+        viewer=tk.Frame(card,bg=COLORS['powder_blue'],height=300); viewer.pack(fill='x',pady=10); viewer.pack_propagate(False)
+        state={'index':0,'job':None,'photo':None}
+        image_label=tk.Label(viewer,bg=COLORS['powder_blue']); image_label.pack(fill='both',expand=True)
+        overlay=tk.Label(viewer,text='',bg='#000000',fg='white',font=FONTS['small'],padx=8,pady=4)
+        def show(index):
+            state['index']=index%len(paths); img=load_image(paths[state['index']],(900,300))
+            if img: image_label.config(image=img); image_label.image=img
+            overlay.config(text=f"Photo {state['index']+1} of {len(paths)}")
+            overlay.place(relx=.02,rely=.04)
+        def next_photo(): show(state['index']+1)
+        def prev_photo(): show(state['index']-1)
+        controls=tk.Frame(card,bg=COLORS['white']); controls.pack(anchor='center',pady=(0,8))
+        make_button(controls,'‹ Previous',prev_photo,False).pack(side='left',padx=4)
+        make_button(controls,'Next ›',next_photo,True).pack(side='left',padx=4)
+        def autoplay():
+            if not self.winfo_exists() or not viewer.winfo_exists(): return
+            next_photo(); state['job']=viewer.after(5000,autoplay)
+        viewer.bind('<Destroy>',lambda e: state.get('job') and viewer.after_cancel(state['job']),add='+')
+        show(0); state['job']=viewer.after(5000,autoplay)
+        tk.Label(card,text='Photos posted by LamGo users and tagged to this destination appear here automatically.',font=FONTS['small'],bg=COLORS['white'],fg=COLORS['muted']).pack(anchor='w')
 
     def build_similar(self, content, place):
         """One row of other places: similar to this one and to the user's taste."""

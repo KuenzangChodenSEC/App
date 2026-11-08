@@ -29,11 +29,12 @@ from .dzongkhag_data import DZONGKHAGS, dzongkhag_rating, places_in  # noqa: F40
 # 1. SETTINGS
 # ---------------------------------------------------------------------------
 COLORS = {
-    # LamGo dashboard palette: deep navy navigation, airy blue backgrounds and warm gold accents.
-    'green': '#0B2D57', 'green_dark': '#071E3D', 'green_light': '#E8F1FF',
-    'bg': '#EAF2FF', 'white': '#FFFFFF', 'text': '#102A4C', 'muted': '#63748C',
-    'border': '#C9D8EE', 'gold': '#F5B942', 'danger': '#C95A5A', 'blue': '#4A7FBD',
-    'cream': '#F5F9FF', 'brown': '#0B2D57', 'brown_dark': '#071E3D',
+    # Ice blue / powder blue / white LamGo theme
+    'green': '#BFE9F5', 'green_dark': '#78C6DD', 'green_light': '#EAF8FC',
+    'bg': '#F7FCFE', 'white': '#FFFFFF', 'text': '#000000', 'muted': '#5B6B73',
+    'border': '#C9E5EF', 'gold': '#4AA9C5', 'danger': '#B42318', 'blue': '#4AA9C5',
+    'cream': '#EAF8FC', 'powder_blue': '#D8EEF7', 'ice_blue': '#BFE9F5',
+    'brown': '#78C6DD', 'brown_dark': '#277C99', 'success': '#4AA9C5',
 }
 
 FONTS = {
@@ -73,23 +74,41 @@ def rounded_card(parent, bg=None, padx=16, pady=16):
                     bd=0, padx=padx, pady=pady)
 
 
-def make_button(parent, text, command, primary=True, width=None):
-    """A flat button. primary=True -> green button, primary=False -> white button."""
-    options = {
-        'text': text, 'command': command,
-        'bg': COLORS['brown'] if primary else COLORS['white'],
-        'fg': COLORS['white'] if primary else COLORS['brown_dark'],
-        'activebackground': COLORS['brown_dark'], 'activeforeground': 'white',
-        'font': FONTS['button'], 'bd': 0, 'cursor': 'hand2', 'padx': 14, 'pady': 8,
-    }
-    if width:
-        options['width'] = width
-    button = tk.Button(parent, **options)
-    normal_bg = options['bg']; hover_bg = COLORS['brown_dark'] if primary else COLORS['cream']
-    button.bind('<Enter>', lambda e: button.config(bg=hover_bg))
-    button.bind('<Leave>', lambda e: button.config(bg=normal_bg))
-    return button
+def add_tooltip(widget, text):
+    """Small hover message explaining what a control does."""
+    tip = {'win': None}
+    def show(_=None):
+        if tip['win'] or not text: return
+        win = tk.Toplevel(widget); win.wm_overrideredirect(True); win.attributes('-topmost', True)
+        x = widget.winfo_rootx() + 8; y = widget.winfo_rooty() + widget.winfo_height() + 4
+        win.geometry(f'+{x}+{y}')
+        tk.Label(win, text=text, bg='#111111', fg='white', font=('Segoe UI', 9), padx=8, pady=5).pack()
+        tip['win'] = win
+    def hide(_=None):
+        if tip['win']:
+            tip['win'].destroy(); tip['win'] = None
+    widget.bind('<Enter>', show, add='+'); widget.bind('<Leave>', hide, add='+')
+    return widget
 
+def place_stats(app, place):
+    """Return one shared, live average based on every user's rating for this place."""
+    ratings=[float(p.get('rating',0) or 0) for p in getattr(app,'posts',[]) if p.get('place')==place.get('name') and float(p.get('rating',0) or 0)>0]
+    if ratings: return sum(ratings)/len(ratings), len(ratings)
+    return float(place.get('rating',0) or 0), int(place.get('reviews',0) or 0)
+
+def make_button(parent, text, command, primary=True, width=None, tooltip=None):
+    """Themed button with lightweight hover and press feedback."""
+    options={'text':text,'command':command,'bg':COLORS['ice_blue'] if primary else COLORS['white'],
+             'fg':'black' if primary else COLORS['brown_dark'],'activebackground':COLORS['powder_blue'],
+             'activeforeground':'black','font':FONTS['button'],'bd':0,'cursor':'hand2','padx':14,'pady':8,'relief':'flat'}
+    if width: options['width']=width
+    button=tk.Button(parent,**options); normal_bg=options['bg']; normal_fg=options['fg']
+    def enter(e): button.config(bg=COLORS['brown_dark'] if primary else COLORS['powder_blue'],fg='white' if primary else 'black')
+    def leave(e): button.config(bg=normal_bg,fg=normal_fg,relief='flat')
+    button.bind('<Enter>',enter); button.bind('<Leave>',leave)
+    button.bind('<ButtonPress-1>',lambda e: button.config(relief='sunken'))
+    button.bind('<ButtonRelease-1>',lambda e: button.config(relief='flat'))
+    add_tooltip(button,tooltip or text); return button
 
 def show_dialog(parent, title, message, kind='info'):
     """Small pop-up message. kind: 'info', 'success', 'warning' or 'error'."""
@@ -309,43 +328,29 @@ NAV_PAGES = ['Home', 'Explore', 'Community', 'Saved Places', 'Reviews', 'Create 
 
 
 def header(parent, app, active='Home'):
-    """Compact professional navigation inspired by the LamGo reference design."""
-    bar = tk.Frame(parent, bg=COLORS['green'], height=62)
-    bar.pack(fill='x')
-    bar.pack_propagate(False)
-
-    logo = load_image(LOGO_IMAGE, (42, 42))
-    if logo:
-        logo_button = tk.Button(bar, image=logo, command=lambda: app.show_page('Home'),
-                                bg=COLORS['green'], activebackground=COLORS['green'], bd=0,
-                                cursor='hand2')
-        logo_button.image = logo
-    else:
-        logo_button = tk.Button(bar, text='LamGo', command=lambda: app.show_page('Home'),
-                                font=('Georgia', 16, 'bold'), fg='white', bg=COLORS['green'], bd=0)
-    logo_button.pack(side='left', padx=(16, 8), pady=8)
-
-    brand = tk.Label(bar, text='LamGo', font=('Georgia', 17, 'bold'), fg='white', bg=COLORS['green'])
-    brand.pack(side='left', padx=(0, 16))
-
-    nav = ['Home', 'Explore', 'Reviews', 'Create Post', 'Community', 'Saved Places', 'Profile']
+    """Ice-blue navigation with clear hover and active states."""
+    bar=tk.Frame(parent,bg=COLORS['ice_blue'],height=70); bar.pack(fill='x'); bar.pack_propagate(False)
+    logo=load_image(LOGO_IMAGE,(52,52))
+    logo_button=tk.Button(bar,image=logo if logo else '',text='' if logo else 'LamGo',command=lambda: app.show_page('Home'),bg=COLORS['ice_blue'],activebackground=COLORS['ice_blue'],bd=0,cursor='hand2')
+    if logo: logo_button.image=logo
+    logo_button.pack(side='left',padx=(16,8),pady=7); add_tooltip(logo_button,'Go to the Home page')
+    brand=tk.Label(bar,text='LamGo',font=('Georgia',19,'bold'),fg='black',bg=COLORS['ice_blue']); brand.pack(side='left',padx=(0,16))
+    nav=['Home','Explore','Reviews','Create Post','Community','Saved Places','Profile']
     for name in nav:
-        active_now = name == active
-        btn = tk.Button(bar, text=name, command=lambda n=name: app.show_page(n),
-                        font=('Segoe UI', 9, 'bold'), bd=0, cursor='hand2', padx=10, pady=7,
-                        bg=COLORS['gold'] if active_now else COLORS['green'],
-                        fg=COLORS['green_dark'] if active_now else '#EAF2FF',
-                        activebackground=COLORS['gold'], activeforeground=COLORS['green_dark'])
-        btn.pack(side='left', padx=2, pady=12)
+        active_now=name==active
+        btn=tk.Button(bar,text=name,command=lambda n=name: app.show_page(n),font=('Segoe UI',11,'bold'),bd=0,cursor='hand2',padx=10,pady=7,bg=COLORS['white'] if active_now else COLORS['ice_blue'],fg='black',activebackground=COLORS['white'],activeforeground='black',relief='flat')
+        btn.pack(side='left',padx=2,pady=12)
         if not active_now:
-            btn.bind('<Enter>', lambda e, b=btn: b.config(bg='#164779'))
-            btn.bind('<Leave>', lambda e, b=btn: b.config(bg=COLORS['green']))
-
-    tk.Button(bar, text='⌂', command=lambda: app.show_page('Location'), bg=COLORS['green'], fg='white',
-              activebackground='#164779', bd=0, font=('Segoe UI', 13), cursor='hand2').pack(side='right', padx=4)
-    tk.Button(bar, text='🔔', command=lambda: app.show_page('Notifications'), bg=COLORS['green'], fg='white',
-              activebackground='#164779', bd=0, font=('Segoe UI Emoji', 12), cursor='hand2').pack(side='right', padx=4)
-
+            btn.bind('<Enter>',lambda e,b=btn:b.config(bg=COLORS['brown_dark'],fg='white'))
+            btn.bind('<Leave>',lambda e,b=btn:b.config(bg=COLORS['ice_blue'],fg='black'))
+        add_tooltip(btn,f'Open the {name} page')
+    icons=tk.Frame(bar,bg=COLORS['ice_blue']); icons.pack(side='left',padx=(7,0))
+    def icon(text,page,tip):
+        b=tk.Button(icons,text=text,command=lambda: app.show_page(page),bg=COLORS['ice_blue'],fg='black',activebackground=COLORS['white'],bd=0,font=('Segoe UI Emoji',14),cursor='hand2',padx=5,pady=4)
+        b.pack(side='left',padx=2); b.bind('<Enter>',lambda e:b.config(bg=COLORS['white'])); b.bind('<Leave>',lambda e:b.config(bg=COLORS['ice_blue'])); add_tooltip(b,tip); return b
+    icon('📍','Location','View your current location')
+    icon('🔔','Notifications','See your notifications')
+    icon('👤','Profile','Open your profile')
 
 def place_card(parent, app, place, compact=False, width=None, note=''):
     """
@@ -359,6 +364,8 @@ def place_card(parent, app, place, compact=False, width=None, note=''):
     card = rounded_card(parent, padx=0, pady=0)
     card.configure(width=width, height=image_height + body_height)
     card.pack_propagate(False)                        # keep the exact size we set
+    add_tooltip(card, f"Open {place['name']} and see its photos, posts and reviews")
+    card.bind('<Button-1>', lambda e: (setattr(app, 'selected_place', place), app.show_page('Place Details')))
 
     # Top: the photo with a heart button in the corner
     visual = tk.Frame(card, bg='#E9DCCB', height=image_height)
@@ -377,7 +384,8 @@ def place_card(parent, app, place, compact=False, width=None, note=''):
              anchor='w', justify='left', wraplength=width - 24).pack(fill='x')
     tk.Label(body, text=place['location'], font=FONTS['small'], bg='white',
              fg=COLORS['muted'], anchor='w').pack(fill='x')
-    tk.Label(body, text=f"★ {place['rating']}  ({place['reviews']})", font=FONTS['small'],
+    average, count = place_stats(app, place)
+    tk.Label(body, text=f"★ {average:.1f}  ({count})", font=FONTS['small'],
              bg='white', fg=COLORS['gold'], anchor='w').pack(fill='x', pady=(3, 0))
     tk.Label(body, text=place['type'], font=FONTS['small'], bg='white',
              fg=COLORS['muted'], anchor='w').pack(fill='x')

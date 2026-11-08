@@ -30,6 +30,7 @@ class HomePage(tk.Frame):
             fill='x', padx=PAGE_PAD - 7)
 
         self.build_recommendations(content)
+        self.build_bhutan_map(content)
 
         self.build_categories(content)
         self.build_quick_access(content)
@@ -87,6 +88,33 @@ class HomePage(tk.Frame):
         ranked = recommend('', activity, location, limit=12)
         card_grid(content, self.app, [r['place'] for r in ranked], max_rows=1,
                   notes=notes_for(ranked)).pack(fill='x', padx=PAGE_PAD - 7)
+
+    def build_bhutan_map(self, content):
+        """Interactive Bhutan travel map. Click a marker to open that destination."""
+        self.section_title(content, 'Bhutan Map — explore places by location')
+        card = rounded_card(content); card.pack(fill='x', padx=PAGE_PAD, pady=(0,20))
+        tk.Label(card, text='Click a place marker to open its page. Your live location is shown when available.', font=FONTS['body'], bg=COLORS['white'], fg=COLORS['muted']).pack(anchor='w', pady=(0,8))
+        canvas=tk.Canvas(card, height=360, bg='#FAFAFA', highlightthickness=1, highlightbackground=COLORS['border'])
+        canvas.pack(fill='x')
+        # Clean schematic silhouette of Bhutan, used as an interactive in-app map.
+        def redraw(event=None):
+            canvas.delete('all'); w=max(canvas.winfo_width(),700); h=360
+            pts=[(40,h*.52),(95,h*.32),(190,h*.22),(310,h*.18),(430,h*.25),(560,h*.19),(w-60,h*.36),(w-35,h*.55),(w-150,h*.69),(w-290,h*.75),(w-430,h*.70),(w-560,h*.64)]
+            flat=[v for xy in pts for v in xy]; canvas.create_polygon(*flat, fill='#E9E9E9', outline='#111111', width=2)
+            # spread catalogue places across the west-east shape using their index.
+            for i,place in enumerate(PLACES):
+                x=90+(i%10)*(max(w-180,300)/9); y=150+((i*47)%150)
+                tag='place_'+str(i)
+                canvas.create_oval(x-6,y-6,x+6,y+6,fill='#111111',outline='white',width=2,tags=(tag,'marker'))
+                canvas.create_text(x,y-13,text=place['name'][:18],font=('Segoe UI',7),fill='#333333',tags=(tag,))
+                def open_place(_e, chosen=place):
+                    self.app.selected_place=chosen; self.app.show_page('Place Details')
+                canvas.tag_bind(tag,'<Button-1>',open_place)
+                canvas.tag_bind(tag,'<Enter>',lambda e: canvas.config(cursor='hand2'))
+                canvas.tag_bind(tag,'<Leave>',lambda e: canvas.config(cursor=''))
+            loc=getattr(self.app,'user_location',None)
+            if loc: canvas.create_text(w-85,25,text='● Live location available',fill='#111111',font=FONTS['small'])
+        canvas.bind('<Configure>', redraw); redraw()
 
     def build_categories(self, content):
         """Row of category buttons that open Explore filtered by that category."""

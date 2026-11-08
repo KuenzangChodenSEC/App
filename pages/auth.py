@@ -18,7 +18,7 @@ from .common import AUTH_IMAGE, BASE_DIR, COLORS, FONTS, image_banner, show_dial
 from .paths import user_data_path
 
 USERS_FILE = user_data_path('users.json', os.path.join(BASE_DIR, 'users.json'))
-CAPTION_BG = '#0B4F8A'
+CAPTION_BG = '#78C6DD'
 PASSWORD_RULES = 'Use 8+ characters with uppercase, lowercase, a number and a symbol.'
 
 # Text shown over the picture for each tab
@@ -104,9 +104,9 @@ class AuthPage(tk.Frame):
             relx=0, rely=0, relwidth=1, relheight=1)
 
         # Small LamGo logo at the top, matching the dashboard style.
-        logo = load_image(LOGO_IMAGE, (58, 58))
+        logo = load_image(LOGO_IMAGE, (64, 64))
         if logo:
-            logo_label = tk.Label(left, image=logo, bg='white', bd=0)
+            logo_label = tk.Label(left, image=logo, bg=left.cget('bg'), bd=0, highlightthickness=0)
             logo_label.image = logo
             logo_label.place(relx=.035, rely=.035, anchor='nw')
 
@@ -123,7 +123,7 @@ class AuthPage(tk.Frame):
         self.form = tk.Frame(right, bg='white', padx=10, pady=10)
         self.form.place(relx=.5, rely=.5, anchor='center', width=480)
 
-        self.title = tk.Label(self.form, font=('Segoe UI', 25, 'bold'), bg='white', fg=COLORS['text'])
+        self.title = tk.Label(self.form, font=('Segoe UI', 25, 'bold'), bg='white', fg='black')
         self.title.pack(anchor='w')
         self.subtitle = tk.Label(self.form, font=FONTS['small'], bg='white', fg=COLORS['muted'])
         self.subtitle.pack(anchor='w', pady=(5, 18))
@@ -151,8 +151,8 @@ class AuthPage(tk.Frame):
 
     def style_tabs(self, active):
         """Highlight the active tab ('login' or 'signup'); None highlights neither."""
-        on = {'bg': COLORS['green'], 'fg': 'white', 'activebackground': COLORS['green_dark']}
-        off = {'bg': '#EEF4FF', 'fg': COLORS['green'], 'activebackground': '#DCE9FA'}
+        on = {'bg': COLORS['ice_blue'], 'fg': 'black', 'activebackground': COLORS['powder_blue']}
+        off = {'bg': COLORS['white'], 'fg': 'black', 'activebackground': COLORS['powder_blue']}
         self.login_tab.config(**(on if active == 'login' else off))
         self.signup_tab.config(**(on if active == 'signup' else off))
 
@@ -166,7 +166,7 @@ class AuthPage(tk.Frame):
     def add_field(self, label_text, show=None, on_enter=None):
         """Add a label + text box to the form and return the text box."""
         tk.Label(self.body, text=label_text, font=FONTS['small'], bg='white',
-                 fg=COLORS['text']).pack(anchor='w', pady=(8, 2))
+                 fg='black').pack(anchor='w', pady=(8, 2))
         entry = tk.Entry(self.body, font=FONTS['body'], bg='#FAFCFB', relief='solid', bd=1, show=show)
         entry.pack(fill='x', ipady=7)
         if on_enter:
@@ -216,7 +216,7 @@ class AuthPage(tk.Frame):
 
     def add_main_button(self, text, command, **pack_options):
         """The big green submit button."""
-        tk.Button(self.body, text=text, command=command, bg=COLORS['green'], fg='white', bd=0,
+        tk.Button(self.body, text=text, command=command, bg=COLORS['ice_blue'], fg='black', bd=0,
                   font=FONTS['button'], cursor='hand2', pady=10).pack(fill='x', **pack_options)
 
     # ------------------------------------------------------------------
