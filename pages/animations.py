@@ -51,7 +51,7 @@ def toast(parent, message, kind='success', duration=2600):
     colors={'success':'#4AA9C5','error':'#D9534F','info':'#78C6DD'}
     win=tk.Toplevel(parent); win.overrideredirect(True); win.attributes('-topmost',True)
     win.configure(bg=colors.get(kind,colors['info']))
-    label=tk.Label(win,text=message,bg=colors.get(kind,colors['info']),fg='white',font=('Segoe UI',10,'bold'),padx=18,pady=10)
+    label=tk.Label(win,text=message,bg=colors.get(kind,colors['info']),fg='white',font=('Times New Roman',10,'bold'),padx=18,pady=10)
     label.pack(); win.update_idletasks()
     x=parent.winfo_rootx()+max(20,parent.winfo_width()-win.winfo_width()-28); y=parent.winfo_rooty()+70
     win.geometry(f'+{x}+{y}')

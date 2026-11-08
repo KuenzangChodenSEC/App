@@ -12,7 +12,7 @@ class SavedPlacesPage(tk.Frame):
 
     def refresh(self):
         clear_frame(self)
-        header(self, self.app, 'Profile')
+        header(self, self.app, 'Saved Places')
         outer, content = scrollable(self)
         outer.pack(fill='both', expand=True)
 

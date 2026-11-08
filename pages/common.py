@@ -38,12 +38,12 @@ COLORS = {
 }
 
 FONTS = {
-    'title': ('Segoe UI', 25, 'bold'),
-    'heading': ('Segoe UI', 18, 'bold'),
-    'subheading': ('Segoe UI', 12, 'bold'),
-    'body': ('Segoe UI', 10),
-    'small': ('Segoe UI', 9),
-    'button': ('Segoe UI', 10, 'bold'),
+    'title': ('Times New Roman', 25, 'bold'),
+    'heading': ('Times New Roman', 18, 'bold'),
+    'subheading': ('Times New Roman', 12, 'bold'),
+    'body': ('Times New Roman', 10),
+    'small': ('Times New Roman', 9),
+    'button': ('Times New Roman', 10, 'bold'),
 }
 
 PAGE_PAD = 40            # left/right margin of every page (pixels)
@@ -82,7 +82,7 @@ def add_tooltip(widget, text):
         win = tk.Toplevel(widget); win.wm_overrideredirect(True); win.attributes('-topmost', True)
         x = widget.winfo_rootx() + 8; y = widget.winfo_rooty() + widget.winfo_height() + 4
         win.geometry(f'+{x}+{y}')
-        tk.Label(win, text=text, bg='#111111', fg='white', font=('Segoe UI', 9), padx=8, pady=5).pack()
+        tk.Label(win, text=text, bg='#111111', fg='white', font=('Times New Roman', 9), padx=8, pady=5).pack()
         tip['win'] = win
     def hide(_=None):
         if tip['win']:
@@ -213,10 +213,13 @@ def load_image(path, size=(400, 220)):
             return None
         with Image.open(path) as source:
             picture = ImageOps.exif_transpose(source).convert('RGBA')
-            # ImageOps.fit fills the frame without stretching the photograph.
-            picture = ImageOps.fit(picture, tuple(size), method=Image.Resampling.LANCZOS,
-                                   centering=(0.5, 0.5))
-            result = ImageTk.PhotoImage(picture)
+            # Contain keeps the complete photograph/logo visible without cropping.
+            picture.thumbnail(tuple(size), Image.Resampling.LANCZOS)
+            canvas = Image.new('RGBA', tuple(size), (255, 255, 255, 0))
+            x = (size[0] - picture.width) // 2
+            y = (size[1] - picture.height) // 2
+            canvas.alpha_composite(picture, (x, y))
+            result = ImageTk.PhotoImage(canvas)
         _image_cache[key] = result
         return result
     except Exception:
@@ -230,7 +233,7 @@ def place_image(parent, place, size=(400, 220), path=None):
         label = tk.Label(parent, image=img, bg='#E9DCCB', bd=0)
         label.image = img                             # keep a reference so Tk does not drop it
         return label
-    return tk.Label(parent, text='Bhutan', font=('Segoe UI', 28, 'bold'),
+    return tk.Label(parent, text='Bhutan', font=('Times New Roman', 28, 'bold'),
                     fg=COLORS['brown_dark'], bg='#E9DCCB')
 
 
@@ -246,7 +249,7 @@ def image_banner(parent, height=None, path=None, bg='#E9DCCB'):
         box.configure(height=height)
     box.pack_propagate(False)                         # frame size is set by us, not by the picture
 
-    label = tk.Label(box, bg=bg, bd=0, text='Bhutan', font=('Segoe UI', 28, 'bold'), fg=COLORS['brown_dark'])
+    label = tk.Label(box, bg=bg, bd=0, text='Bhutan', font=('Times New Roman', 28, 'bold'), fg=COLORS['brown_dark'])
     label.pack(fill='both', expand=True)
 
     image_path = path or DEFAULT_IMAGE
@@ -328,29 +331,22 @@ NAV_PAGES = ['Home', 'Explore', 'Community', 'Saved Places', 'Reviews', 'Create 
 
 
 def header(parent, app, active='Home'):
-    """Ice-blue navigation with clear hover and active states."""
-    bar=tk.Frame(parent,bg=COLORS['ice_blue'],height=70); bar.pack(fill='x'); bar.pack_propagate(False)
-    logo=load_image(LOGO_IMAGE,(52,52))
+    """Header with a fully visible logo and navigation centred as one group."""
+    bar=tk.Frame(parent,bg=COLORS['ice_blue'],height=82); bar.pack(fill='x'); bar.pack_propagate(False)
+    logo=load_image(LOGO_IMAGE,(170,66))
     logo_button=tk.Button(bar,image=logo if logo else '',text='' if logo else 'LamGo',command=lambda: app.show_page('Home'),bg=COLORS['ice_blue'],activebackground=COLORS['ice_blue'],bd=0,cursor='hand2')
     if logo: logo_button.image=logo
-    logo_button.pack(side='left',padx=(16,8),pady=7); add_tooltip(logo_button,'Go to the Home page')
-    brand=tk.Label(bar,text='LamGo',font=('Georgia',19,'bold'),fg='black',bg=COLORS['ice_blue']); brand.pack(side='left',padx=(0,16))
+    logo_button.pack(side='left',padx=(22,12),pady=8)
+    nav_box=tk.Frame(bar,bg=COLORS['ice_blue']); nav_box.pack(side='left',expand=True)
     nav=['Home','Explore','Reviews','Create Post','Community','Saved Places','Profile']
     for name in nav:
         active_now=name==active
-        btn=tk.Button(bar,text=name,command=lambda n=name: app.show_page(n),font=('Segoe UI',11,'bold'),bd=0,cursor='hand2',padx=10,pady=7,bg=COLORS['white'] if active_now else COLORS['ice_blue'],fg='black',activebackground=COLORS['white'],activeforeground='black',relief='flat')
-        btn.pack(side='left',padx=2,pady=12)
-        if not active_now:
-            btn.bind('<Enter>',lambda e,b=btn:b.config(bg=COLORS['brown_dark'],fg='white'))
-            btn.bind('<Leave>',lambda e,b=btn:b.config(bg=COLORS['ice_blue'],fg='black'))
-        add_tooltip(btn,f'Open the {name} page')
-    icons=tk.Frame(bar,bg=COLORS['ice_blue']); icons.pack(side='left',padx=(7,0))
-    def icon(text,page,tip):
-        b=tk.Button(icons,text=text,command=lambda: app.show_page(page),bg=COLORS['ice_blue'],fg='black',activebackground=COLORS['white'],bd=0,font=('Segoe UI Emoji',14),cursor='hand2',padx=5,pady=4)
-        b.pack(side='left',padx=2); b.bind('<Enter>',lambda e:b.config(bg=COLORS['white'])); b.bind('<Leave>',lambda e:b.config(bg=COLORS['ice_blue'])); add_tooltip(b,tip); return b
-    icon('📍','Location','View your current location')
-    icon('🔔','Notifications','See your notifications')
-    icon('👤','Profile','Open your profile')
+        btn=tk.Button(nav_box,text=name,command=lambda n=name: app.show_page(n),font=('Times New Roman',10,'bold'),bd=0,cursor='hand2',padx=9,pady=8,bg=COLORS['white'] if active_now else COLORS['ice_blue'],fg='black',activebackground=COLORS['white'],activeforeground='black',relief='flat')
+        btn.pack(side='left',padx=3,pady=15)
+    # Utility icons stay beside the centred navigation, never at the far screen corner.
+    for text,page,tip in [('📍','Location','View your current location'),('🔔','Notifications','See your notifications')]:
+        b=tk.Button(nav_box,text=text,command=lambda p=page: app.show_page(p),bg=COLORS['ice_blue'],fg='black',activebackground=COLORS['white'],bd=0,font=('Times New Roman',12),cursor='hand2',padx=4,pady=4)
+        b.pack(side='left',padx=2); add_tooltip(b,tip)
 
 def place_card(parent, app, place, compact=False, width=None, note=''):
     """
@@ -374,7 +370,7 @@ def place_card(parent, app, place, compact=False, width=None, note=''):
     place_image(visual, place, (width, image_height)).pack(fill='both', expand=True)
     heart = '♥' if place['name'] in app.saved_places else '♡'
     tk.Button(visual, text=heart, command=lambda: app.toggle_saved(place), bg='white',
-              fg=COLORS['brown'], bd=0, font=('Segoe UI', 13),
+              fg=COLORS['brown'], bd=0, font=('Times New Roman', 13),
               cursor='hand2').place(relx=.94, rely=.08, anchor='ne')
 
     # Bottom: text details

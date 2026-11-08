@@ -35,7 +35,7 @@ class ReviewsPage(tk.Frame):
         tk.Label(content, text='Reviews & Ratings', font=FONTS['title'], bg=COLORS['bg'], fg=COLORS['brown_dark']).pack(anchor='w', padx=PAGE_PAD, pady=(20, 4))
         tk.Label(content, text=place['name'], font=FONTS['subheading'], bg=COLORS['bg'], fg=COLORS['muted']).pack(anchor='w', padx=PAGE_PAD, pady=(0, 12))
         summary = rounded_card(content); summary.pack(fill='x', padx=PAGE_PAD)
-        tk.Label(summary, text=f'{average:.1f}', font=('Segoe UI', 38, 'bold'), bg=COLORS['white'], fg=COLORS['text']).pack(side='left', padx=20)
+        tk.Label(summary, text=f'{average:.1f}', font=('Times New Roman', 38, 'bold'), bg=COLORS['white'], fg=COLORS['text']).pack(side='left', padx=20)
         tk.Label(summary, text=(('★' * round(average)) + ('☆' * (5-round(average))) + f'\nBased on {len(ratings)} user rating(s)') if ratings else 'No user ratings yet\nBe the first to rate this place', font=FONTS['body'], fg=COLORS['gold'], bg=COLORS['white']).pack(side='left')
         make_button(summary, 'Write a Review', self.write_review, True).pack(side='right', padx=10)
         box = rounded_card(content); box.pack(fill='x', padx=PAGE_PAD, pady=16)

@@ -61,7 +61,7 @@ class CreatePostPage(tk.Frame):
         stars.pack(anchor='w')
         self.star_buttons = []
         for number in range(1, 6):
-            button = tk.Button(stars, text='☆', font=('Segoe UI', 20), fg=COLORS['gold'], bg='white',
+            button = tk.Button(stars, text='☆', font=('Times New Roman', 20), fg=COLORS['gold'], bg='white',
                                bd=0, cursor='hand2', command=lambda n=number: self.set_rating(n))
             button.pack(side='left')
             self.star_buttons.append(button)

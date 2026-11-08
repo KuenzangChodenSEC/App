@@ -2,10 +2,12 @@
   "08230151.sce@rub.edu.bt": {
     "searches": [],
     "types": {
-      "Nature & Hiking": 2.94
+      "Nature & Hiking": 1.717,
+      "Cultural Sites": 6.649
     },
     "difficulty": {
-      "Moderate": 1.179
+      "Moderate": 0.601,
+      "Easy": 2.839
     }
   }
 }

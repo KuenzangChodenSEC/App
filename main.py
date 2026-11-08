@@ -262,10 +262,15 @@ class LamGoApp(tk.Tk):
         except queue.Empty:
             self.after(300, self._poll_location)
             return
-        if location:
+        # Never let a late IP lookup overwrite a location the user selected manually
+        # or supplied through the browser's precise geolocation permission.
+        current_source = (self.user_location or {}).get('source')
+        if current_source in ('manual', 'browser'):
+            self.location_status = 'ok'
+        elif location:
             self.user_location, self.location_status = location, 'ok'
         else:
-            self.location_status = 'failed'      # offline: keep any location the user chose by hand
+            self.location_status = 'failed'
         self.notify_location_listeners()
         if self.current_page in ('Home', 'Location', 'Explore', 'Dzongkhag'):
             self.frames[self.current_page].refresh()  # update nearby recommendations and the location status

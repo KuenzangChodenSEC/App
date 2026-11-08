@@ -92,10 +92,10 @@ class AuthPage(tk.Frame):
     def build_layout(self):
         """Two equal-ish halves: picture on the left, form on the right."""
         outer = tk.Frame(self, bg=COLORS['bg'])
-        outer.pack(fill='both', expand=True, padx=50, pady=40)
+        outer.pack(fill='both', expand=True, padx=28, pady=24)
         outer.grid_rowconfigure(0, weight=1)
-        outer.grid_columnconfigure(0, weight=5)
-        outer.grid_columnconfigure(1, weight=4)
+        outer.grid_columnconfigure(0, weight=7)
+        outer.grid_columnconfigure(1, weight=5)
 
         # --- Left: picture + caption strip at the bottom ---
         left = tk.Frame(outer, bg='white')
@@ -104,15 +104,15 @@ class AuthPage(tk.Frame):
             relx=0, rely=0, relwidth=1, relheight=1)
 
         # Small LamGo logo at the top, matching the dashboard style.
-        logo = load_image(LOGO_IMAGE, (64, 64))
+        logo = load_image(LOGO_IMAGE, (220, 145))
         if logo:
             logo_label = tk.Label(left, image=logo, bg=left.cget('bg'), bd=0, highlightthickness=0)
             logo_label.image = logo
-            logo_label.place(relx=.035, rely=.035, anchor='nw')
+            logo_label.place(relx=.025, rely=.025, anchor='nw')
 
         caption = tk.Frame(left, bg=CAPTION_BG)
         caption.place(relx=0, rely=.72, relwidth=1, relheight=.28)
-        self.caption_title = tk.Label(caption, font=('Segoe UI', 15, 'bold'), bg=CAPTION_BG, fg='white')
+        self.caption_title = tk.Label(caption, font=('Times New Roman', 15, 'bold'), bg=CAPTION_BG, fg='white')
         self.caption_title.pack(anchor='w', padx=35, pady=(22, 0))
         self.caption_text = tk.Label(caption, font=FONTS['body'], bg=CAPTION_BG, fg='#E8F1FF')
         self.caption_text.pack(anchor='w', padx=35, pady=7)
@@ -123,9 +123,9 @@ class AuthPage(tk.Frame):
         self.form = tk.Frame(right, bg='white', padx=10, pady=10)
         self.form.place(relx=.5, rely=.5, anchor='center', width=480)
 
-        self.title = tk.Label(self.form, font=('Segoe UI', 25, 'bold'), bg='white', fg='black')
+        self.title = tk.Label(self.form, font=('Times New Roman', 28, 'bold'), bg='white', fg='black')
         self.title.pack(anchor='w')
-        self.subtitle = tk.Label(self.form, font=FONTS['small'], bg='white', fg=COLORS['muted'])
+        self.subtitle = tk.Label(self.form, font=FONTS['small'], bg='white', fg='black')
         self.subtitle.pack(anchor='w', pady=(5, 18))
 
         # LOGIN / SIGN UP tabs
@@ -181,27 +181,27 @@ class AuthPage(tk.Frame):
         - Under the CONFIRM box: only 'Passwords match' / 'Passwords do not match'.
         """
         password = self.add_field(password_label, show='•', on_enter=on_enter)
-        rules = tk.Label(self.body, text=PASSWORD_RULES, font=('Segoe UI', 8), bg='white',
-                         fg=COLORS['muted'], justify='left', anchor='w')
+        rules = tk.Label(self.body, text=PASSWORD_RULES, font=('Times New Roman', 8), bg='white',
+                         fg='black', justify='left', anchor='w')
         rules.pack(fill='x', pady=(3, 0))
 
         confirm = self.add_field(confirm_label, show='•', on_enter=on_enter)
-        match = tk.Label(self.body, text='', font=('Segoe UI', 8), bg='white', anchor='w')
+        match = tk.Label(self.body, text='', font=('Times New Roman', 8), bg='white', anchor='w')
         match.pack(fill='x', pady=(3, 0))
 
         def update_rules(_event=None):
             """Rules text under the first box."""
             if password.get() and strong_password(password.get()):
-                rules.config(text='✓ Strong password', fg=COLORS['green'])
+                rules.config(text='✓ Strong password', fg='black')
             else:
-                rules.config(text=PASSWORD_RULES, fg=COLORS['muted'])
+                rules.config(text=PASSWORD_RULES, fg='black')
 
         def update_match(_event=None):
             """Match message under the confirm box (empty until the user types in it)."""
             if not confirm.get():
                 match.config(text='')
             elif confirm.get() == password.get():
-                match.config(text='Passwords match.', fg=COLORS['green'])
+                match.config(text='Passwords match.', fg='black')
             else:
                 match.config(text='Passwords do not match.', fg=COLORS['danger'])
 
@@ -211,7 +211,7 @@ class AuthPage(tk.Frame):
 
     def add_link_button(self, text, command, font=None, **pack_options):
         """A text-only green button (used for 'Show password', 'Create an account', ...)."""
-        tk.Button(self.body, text=text, command=command, bg='white', fg=COLORS['green'], bd=0,
+        tk.Button(self.body, text=text, command=command, bg='white', fg='black', bd=0,
                   font=font or FONTS['small'], cursor='hand2').pack(**pack_options)
 
     def add_main_button(self, text, command, **pack_options):
@@ -237,7 +237,7 @@ class AuthPage(tk.Frame):
         self.add_main_button('LOGIN', self.login_user)
 
         tk.Label(self.body, text="Don't have an account?", font=FONTS['small'], bg='white',
-                 fg=COLORS['muted']).pack(pady=(22, 3))
+                 fg='black').pack(pady=(22, 3))
         self.add_link_button('Create an account', self.show_signup, font=FONTS['button'])
         self.login_email.focus_set()
 
@@ -280,7 +280,7 @@ class AuthPage(tk.Frame):
         self.add_main_button('CREATE ACCOUNT', self.signup_user, pady=8)
 
         tk.Label(self.body, text='Already have an account?', font=FONTS['small'], bg='white',
-                 fg=COLORS['muted']).pack(pady=(12, 3))
+                 fg='black').pack(pady=(12, 3))
         self.add_link_button('Login here', self.show_login, font=FONTS['button'])
         self.signup_name.focus_set()
 

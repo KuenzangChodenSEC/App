@@ -38,7 +38,7 @@ class PlaceDetailsPage(tk.Frame):
         info.pack(fill='x', padx=PAGE_PAD)
 
         tk.Label(info, text='About this place', font=FONTS['heading'], bg='white').pack(anchor='w')
-        description = tk.Label(info, text=place['description'], font=('Segoe UI', 11), bg='white',
+        description = tk.Label(info, text=place['description'], font=('Times New Roman', 11), bg='white',
                                fg=COLORS['muted'], justify='left', anchor='w')
         description.pack(fill='x', pady=8)
         autowrap(description)

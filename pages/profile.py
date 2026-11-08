@@ -42,7 +42,7 @@ class ProfilePage(tk.Frame):
             picture.image = image
             picture.pack(fill='both', expand=True)
         else:
-            tk.Label(avatar, text='👤', font=('Segoe UI Emoji', 45), bg='white').pack(expand=True)
+            tk.Label(avatar, text='👤', font=('Times New Roman Emoji', 45), bg='white').pack(expand=True)
 
         info = tk.Frame(top, bg='white')
         info.pack(side='left', fill='x', expand=True)

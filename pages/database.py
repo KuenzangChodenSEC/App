@@ -10,7 +10,7 @@ import sqlite3
 from .paths import user_data_path, user_data_dir
 
 _BUNDLED_DB = Path(__file__).resolve().parent.parent / 'data' / 'lamgo.db'
-DB_PATH = Path(user_data_path('lamgo.db', _BUNDLED_DB))
+DB_PATH = _BUNDLED_DB
 DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 SCHEMA = '''

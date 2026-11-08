@@ -50,7 +50,7 @@ class MyPostsPage(tk.Frame):
             picture.image = image
             picture.pack(fill='both', expand=True)
         else:
-            tk.Label(left, text='📷\nNo photo', font=('Segoe UI Emoji', 18), bg='#F0F5F1',
+            tk.Label(left, text='📷\nNo photo', font=('Times New Roman Emoji', 18), bg='#F0F5F1',
                      fg=COLORS['muted']).pack(fill='both', expand=True)
 
         # Text

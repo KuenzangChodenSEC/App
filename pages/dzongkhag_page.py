@@ -50,7 +50,7 @@ class DzongkhagPage(tk.Frame):
         card.pack(fill='x', padx=PAGE_PAD)
 
         tk.Label(card, text=f"About {dz['name']}", font=FONTS['heading'], bg='white').pack(anchor='w')
-        about = tk.Label(card, text=dz['description'], font=('Segoe UI', 11), bg='white',
+        about = tk.Label(card, text=dz['description'], font=('Times New Roman', 11), bg='white',
                          fg=COLORS['muted'], justify='left', anchor='w')
         about.pack(fill='x', pady=8)
         autowrap(about)
@@ -73,7 +73,7 @@ class DzongkhagPage(tk.Frame):
         climate.pack(fill='x', pady=(8, 4), padx=3)
         tk.Label(climate, text='🌤  Climate', font=FONTS['subheading'], bg='#EAF6EF',
                  fg=COLORS['green_dark']).pack(anchor='w')
-        climate_text = tk.Label(climate, text=dz['climate'], font=('Segoe UI', 11), bg='#EAF6EF',
+        climate_text = tk.Label(climate, text=dz['climate'], font=('Times New Roman', 11), bg='#EAF6EF',
                                 fg=COLORS['text'], justify='left', anchor='w')
         climate_text.pack(fill='x', pady=(4, 0))
         autowrap(climate_text)
