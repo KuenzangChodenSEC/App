@@ -12,6 +12,7 @@ import json
 import os
 import re
 import tkinter as tk
+from turtle import left
 
 from .common import LOGO_IMAGE, load_image
 from .common import AUTH_IMAGE, BASE_DIR, COLORS, FONTS, image_banner, show_dialog
@@ -90,21 +91,31 @@ class AuthPage(tk.Frame):
     # Fixed layout (built once)
     # ------------------------------------------------------------------
     def build_layout(self):
-        """Two equal-ish halves: picture on the left, form on the right."""
+        """Larger picture on the left and form on the right."""
         outer = tk.Frame(self, bg=COLORS['bg'])
-        outer.pack(fill='both', expand=True, padx=28, pady=24)
+        outer.pack(fill='both', expand=True, padx=15, pady=15)
+
+    # Give more space to the image
         outer.grid_rowconfigure(0, weight=1)
-        outer.grid_columnconfigure(0, weight=7)
+        outer.grid_columnconfigure(0, weight=8)
         outer.grid_columnconfigure(1, weight=5)
 
-        # --- Left: picture + caption strip at the bottom ---
+    # --- Left: Full-size picture ---
         left = tk.Frame(outer, bg='white')
         left.grid(row=0, column=0, sticky='nsew')
-        image_banner(left, path=AUTH_IMAGE, bg='white').place(
-            relx=0, rely=0, relwidth=1, relheight=1)
+
+        left.update_idletasks()
+
+        img = image_banner(left, path=AUTH_IMAGE, bg='white')
+        img.place(
+    x=0,
+    y=0,
+    relwidth=1,
+    relheight=1
+)
 
         # Small LamGo logo at the top, matching the dashboard style.
-        logo = load_image(LOGO_IMAGE, (220, 145))
+        logo = load_image(LOGO_IMAGE, (150, 80))
         if logo:
             logo_label = tk.Label(left, image=logo, bg=left.cget('bg'), bd=0, highlightthickness=0)
             logo_label.image = logo

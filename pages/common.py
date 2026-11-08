@@ -54,7 +54,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 PLACES_DIR = os.path.join(ASSETS_DIR, 'places')                      # one photo per place
 DZONGKHAGS_DIR = os.path.join(ASSETS_DIR, 'dzongkhags')                # optional: one photo per dzongkhag
 DEFAULT_IMAGE = os.path.join(ASSETS_DIR, 'bhutan_place.jpg')         # used if a place has no photo
-AUTH_IMAGE = os.path.join(ASSETS_DIR, 'auth_background.jpg')
+AUTH_IMAGE = os.path.join(ASSETS_DIR, 'home_page.jpg')
 LOGO_IMAGE = os.path.join(ASSETS_DIR, 'lamgo_logo.png')         # login / sign-up picture
 IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.webp')
 
