@@ -9,5 +9,15 @@
       "Moderate": 0.601,
       "Easy": 2.839
     }
+  },
+  "demo@lamgo.bt": {
+    "searches": [
+      "zzzzqq",
+      "hike"
+    ],
+    "types": {
+      "Nature & Hiking": 1.5
+    },
+    "difficulty": {}
   }
 }
